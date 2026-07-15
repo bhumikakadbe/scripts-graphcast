@@ -20,6 +20,38 @@ graph TD
 
 ---
 
+## 🚀 Quick Start Command Flow
+For a standard run, execute these commands sequentially from the root of your workspace:
+
+```bash
+# Step 1: Set up the environment & install graphcast package
+conda env create -f environment.yml
+conda activate graphcast
+pip install -e "c:\Users\Asus\Clone files\graphcast"
+
+# Step 2: Test Copernicus CDS API connection (Global grid verification)
+python data_collection/era5_downloader.py --test --region global
+
+# Step 3: Run pre-training validation (pipeline check + NaN audit)
+python test_data_pipeline.py
+python validate_training_inputs.py
+
+# Step 4: Run GNN training (20 epochs)
+python run_unseen_workflow.py --stage 3 --year 2016 --use-simulation --epochs 20
+
+# Step 5: Evaluate model generalization & generate validation scorecard
+python run_unseen_workflow.py --stage 2 --year 2016 --checkpoint checkpoints/model_2016.nc --eval-days 15
+
+# Step 6: Run compute & memory benchmarking report
+python benchmark_hardware.py
+
+# Step 7: Run operational API & dashboard
+python -m uvicorn production_pipeline.app:app --port 8000
+```
+
+---
+
+
 ## Phase 0: Environment & API Configuration
 
 Before running any script, make sure your Python environment, CUDA drivers, and Copernicus Climate Data Store (CDS) credentials are set up.
