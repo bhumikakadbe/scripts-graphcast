@@ -63,8 +63,9 @@ NAGPUR_REGION = [25.0, 74.0, 17.0, 85.0]
 # For full India coverage
 INDIA_REGION = [38.0, 66.0, 6.0, 100.0]
 
-# For global coverage (no area restriction)
-GLOBAL_REGION = None
+# For global coverage
+GLOBAL_REGION = [90.0, -180.0, -90.0, 180.0]
+
 
 # ─── ERA5 Variable Configuration ──────────────────────────────────────────────
 # Pressure-level variables (require 'reanalysis-era5-pressure-levels')
@@ -151,8 +152,9 @@ class ERA5Downloader:
             region: [N, W, S, E] bounding box in degrees.
                     Defaults to Nagpur region (17°N–25°N, 74°E–85°E).
         """
-        self.region = region or NAGPUR_REGION
+        self.region = region if region is not None else NAGPUR_REGION
         self._client = None  # Lazy-initialize to avoid import error if cdsapi not installed
+
 
     @property
     def client(self):
@@ -518,7 +520,7 @@ def main():
     region_map = {
         "nagpur": NAGPUR_REGION,
         "india":  INDIA_REGION,
-        "global": None,
+        "global": GLOBAL_REGION,
     }
     region = region_map[args.region]
 
