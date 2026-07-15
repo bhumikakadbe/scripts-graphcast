@@ -1,10 +1,126 @@
-# Pycache
+# ============================================================
+#  scripts-graphcast — .gitignore
+# ============================================================
+
+# --- Python bytecode and build artifacts ---
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+.eggs/
+dist/
+build/
+*.so
+*.whl
 
-# Local Directory Junctions (linked from main graphcast repo)
-analysis/
-compression/
-checkpoints/
-data/
-logs/
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+.env
+.conda/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+*.ipynb
+
+# --- IDE and editor files ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# --- OS-specific files ---
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+*.lnk
+
+# ============================================================
+#  DATA — Never commit large downloaded ERA5/IMD files
+# ============================================================
+data/ERA5/raw/
+data/ERA5/processed/
+data/IMD/
+data/merged/
+data/*.nc
+data/*.grib
+
+# ============================================================
+#  LOGS — Auto-generated runtime logs
+# ============================================================
+logs/*.log
+logs/*.csv
+logs/*.png
+logs/*.md
+logs/*.json
+# Keep the logs/ folder itself tracked
+!logs/.gitkeep
+
+# ============================================================
+#  CHECKPOINTS — Keep base model, ignore generated ones
+# ============================================================
+# Ignore year-by-year fine-tuned checkpoints (can be regenerated)
+checkpoints/model_20*.nc
+checkpoints/model_original.nc
+checkpoints/model_compressed.nc
+
+# Keep essential base files (normalization stats + base model + template dataset)
+!checkpoints/fine_tuned_model.nc
+!checkpoints/diffs_stddev_by_level.nc
+!checkpoints/mean_by_level.nc
+!checkpoints/stddev_by_level.nc
+!checkpoints/source-era5_date-2022-01-01_res-1.0_levels-13_steps-04.nc
+!checkpoints/.gitkeep
+
+# ============================================================
+#  COMPRESSION — Ignore generated PCA models and outputs
+# ============================================================
+compression/pca_models/*.pkl
+compression/pca_models/*.joblib
+compression/outputs/
+
+# ============================================================
+#  STATIC OUTPUTS — Ignore API-generated forecast images
+# ============================================================
+static/outputs/
+static/*.png
+static/*.jpg
+
+# ============================================================
+#  GRAPHCAST EXAMPLE INFO — Exclude from repo
+# ============================================================
+graphcast_example_info/
+
+# ============================================================
+#  TEMPORARY AND GENERATED FILES
+# ============================================================
+*.tmp
+*.temp
+*.bak
+*.orig
+*.log
+*.cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+.tox/
+.nox/
+
+# --- Profiling ---
+*.prof
+*.lprof
+*.stats

@@ -16,6 +16,11 @@ def align_coordinates(ds: xr.Dataset) -> xr.Dataset:
     """
     logger.info("Aligning coordinates for GraphCast...")
     
+    # Ensure batch dimension is present (Copernicus CDS downloads don't include it, but GraphCast expects it)
+    if "batch" not in ds.dims:
+        logger.info("Adding missing 'batch' dimension of size 1 to dataset.")
+        ds = ds.expand_dims("batch")
+        
     # 1. Coordinate naming standardization
     rename_dict = {}
     if "latitude" in ds.coords and "lat" not in ds.dims:
@@ -114,6 +119,16 @@ def standardize_variables(
     else:
         logger.warning(f"Static template not found at '{static_template_path}'. Static variables remain missing.")
             
+    # 4. Strip time and batch dimensions from static variables to conform to GraphCast
+    for var in ["geopotential_at_surface", "land_sea_mask"]:
+        if var in ds.data_vars:
+            if "time" in ds[var].dims:
+                ds[var] = ds[var].isel(time=0, drop=True)
+                logger.info(f"Stripped 'time' dimension from static variable '{var}'")
+            if "batch" in ds[var].dims:
+                ds[var] = ds[var].isel(batch=0, drop=True)
+                logger.info(f"Stripped 'batch' dimension from static variable '{var}'")
+
     return ds
 
 def regrid_dataset(ds: xr.Dataset, target_lat: np.ndarray, target_lon: np.ndarray) -> xr.Dataset:
@@ -142,13 +157,25 @@ def add_graphcast_forcings(ds: xr.Dataset) -> xr.Dataset:
     if "datetime" not in ds.coords:
         # Generate datetime coordinate from time coordinate if time is Timestamp
         if ds["time"].dtype == "O" or isinstance(ds["time"].values[0], (pd.Timestamp, np.datetime64)):
-            ds = ds.assign_coords(datetime=ds["time"])
+            datetime_vals = ds["time"]
         else:
             # Assuming time coordinate contains timedeltas or relative offsets from an epoch
             # Generate a mock epoch starting point if not set
             epoch = pd.Timestamp("2020-01-01 00:00:00")
             datetimes = [epoch + pd.Timedelta(t) for t in ds["time"].values]
-            ds = ds.assign_coords(datetime=("time", datetimes))
+            datetime_vals = xr.DataArray(datetimes, dims=["time"], coords={"time": ds["time"]})
+            
+        # If batch is present in dataset, expand datetime to ('batch', 'time')
+        if "batch" in ds.dims:
+            datetime_vals = datetime_vals.expand_dims(batch=ds.sizes["batch"])
+            
+        ds = ds.assign_coords(datetime=datetime_vals)
+    else:
+        # If datetime is present but lacks batch dimension, expand it
+        if "batch" in ds.dims and "batch" not in ds.coords["datetime"].dims:
+            logger.info("Expanding existing 'datetime' coordinate with 'batch' dimension...")
+            datetime_vals = ds.coords["datetime"].expand_dims(batch=ds.sizes["batch"])
+            ds = ds.assign_coords(datetime=datetime_vals)
             
     # Cast variables in place using data_utils
     # Copy dataset to avoid mutating source dataset in unexpected ways
