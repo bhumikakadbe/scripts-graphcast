@@ -1,0 +1,10 @@
+# Pycache
+__pycache__/
+*.pyc
+
+# Local Directory Junctions (linked from main graphcast repo)
+analysis/
+compression/
+checkpoints/
+data/
+logs/
