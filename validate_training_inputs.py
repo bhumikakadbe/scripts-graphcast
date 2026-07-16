@@ -25,7 +25,15 @@ def main():
     try:
         # 1. Load data
         logger.info(f"Loading local dataset: {DATASET_LOCAL_PATH}")
-        ds = xr.open_dataset(DATASET_LOCAL_PATH, engine="scipy")
+        ds = xr.open_dataset(
+        DATASET_LOCAL_PATH,
+        engine="netcdf4",
+        decode_times=False,
+        )
+
+        ds = ds.assign_coords(
+        time=pd.to_timedelta(ds.time.values, unit="h")
+        )
         
         # 2. Preprocess / Align Coordinates
         ds = preprocessing.align_coordinates(ds)
