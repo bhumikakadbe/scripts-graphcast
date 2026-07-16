@@ -46,7 +46,15 @@ def run_phase_1_data_pipeline() -> xr.Dataset:
     
     # 1. Load ERA5 Zarr/NetCDF
     logger.info(f"Loading dataset from: {DATASET_LOCAL_PATH}")
-    ds = xr.open_dataset(DATASET_LOCAL_PATH, engine="scipy")
+    ds = xr.open_dataset(
+    DATASET_LOCAL_PATH,
+    engine="netcdf4",
+    decode_times=False,
+    )
+
+    ds = ds.assign_coords(
+        time=pd.to_timedelta(ds.time.values, unit="h")
+    )
     
     logger.info("Original Dataset Dimensions:")
     for dim, size in ds.dims.items():
