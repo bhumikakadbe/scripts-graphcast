@@ -73,13 +73,15 @@ checkpoints/model_20*.nc
 checkpoints/model_original.nc
 checkpoints/model_compressed.nc
 
-# Keep essential base files (normalization stats + base model + template dataset)
+# Keep essential base files (normalization stats + base model)
 !checkpoints/fine_tuned_model.nc
 !checkpoints/diffs_stddev_by_level.nc
 !checkpoints/mean_by_level.nc
 !checkpoints/stddev_by_level.nc
-!checkpoints/source-era5_date-2022-01-01_res-1.0_levels-13_steps-04.nc
 !checkpoints/.gitkeep
+
+# Large ERA5 template dataset — too big for GitHub (126 MB), re-download via era5_downloader.py
+checkpoints/source-era5_*.nc
 
 # ============================================================
 #  COMPRESSION — Ignore generated PCA models and outputs
