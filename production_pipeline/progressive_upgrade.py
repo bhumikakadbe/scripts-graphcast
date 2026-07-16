@@ -33,7 +33,15 @@ def generate_simulated_dataset(year: int, template_path: str = DATASET_TEMPLATE_
         raise FileNotFoundError(f"Template dataset missing at {template_path}")
         
     logger.info(f"Generating simulated training dataset for year {year} using template...")
-    ds = xr.open_dataset(template_path, engine="scipy")
+    ds = xr.open_dataset(
+    template_path,
+    engine="netcdf4",
+    decode_times=False,
+    )
+
+    ds = ds.assign_coords(
+        time=pd.to_timedelta(ds.time.values, unit="h")
+    )
     
     # Generate variations
     np.random.seed(year)
